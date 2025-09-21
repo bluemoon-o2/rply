@@ -1,0 +1,16 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "rply"
+version = "0.7.7"
+description = "A pure Python Lex/Yacc that works with RPython"
+readme = "README.md"
+requires-python = ">=3.7"
+dependencies = [
+    "appdirs",
+]
+authors = [
+    { name = "Alex Gaynor", email = "alex.gaynor@gmail.com" }
+]
