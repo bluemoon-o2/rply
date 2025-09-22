@@ -65,4 +65,4 @@ class LexerStream:
                 token = Token(rule.name, self.s[match.start:match.end], source_pos)
                 return token
         else:
-            raise LexingError(None, SourcePosition(self.idx, self._lineno, self._colno))
+            raise LexingError(f"No rule matches!", SourcePosition(self.idx, self._lineno, self._colno))

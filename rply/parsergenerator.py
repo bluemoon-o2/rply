@@ -210,7 +210,7 @@ class LRTable:
                                         st_actionp[a] = p
                                         if not rlevel:
                                             sr_conflicts.append((st, repr(a), "shift"))
-                                    elif not (slevel == rlevel and rprec == "nonassoc"):
+                                    elif not (slevel == rlevel and rprec == "non_assoc"):
                                         if not slevel and not rlevel:
                                             sr_conflicts.append((st, repr(a), "reduce"))
                                 else:
