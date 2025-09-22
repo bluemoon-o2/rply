@@ -1,17 +1,5 @@
-# RPLY
-
-Welcome to RPLY! A pure Python parser generator, that also works with RPython.
-It is a more-or-less direct port of David Beazley's awesome PLY, with a new
-public API, and RPython support.
-
-You can also find the documentation [online](https://rply.readthedocs.io/).
-## Examples
-With RPLY, you can create a simple compiler like this:
-
-[A simple compiler](./examples/my_compiler.py)
-## How to create your own parser:
-```python
 from rply import LexerGenerator, ParserGenerator, BaseBox
+from LL1 import Tokenizer, Parser, Interpreter
 
 class Number(BaseBox):
     def __init__(self, value):
@@ -28,7 +16,7 @@ class Variable(BaseBox):
 
     def eval(self):
         if self.value not in Variable.variables:
-            raise ValueError(f"Undefined variable: {self.value}")
+            raise ValueError(f"未定义的变量: {self.value}")
         return Variable.variables[self.value]
 
 class BinaryOp(BaseBox):
@@ -98,7 +86,7 @@ def demo1(code: str):
     @pg.production('expr : expr ASSIGN expr')
     def expr_assignment(p):
         if not isinstance(p[0], Variable):
-            raise ValueError("Assignment must have a variable on the left side")
+            raise ValueError("赋值语句左侧必须是变量")
         return Assignment(p[0], p[2])
 
     @pg.production('expr : expr PLUS expr')
@@ -110,15 +98,15 @@ def demo1(code: str):
         left = p[0]
         right = p[2]
         if p[1].get_type() == "PLUS":
-            return Add(left, right)
+            return Add(left, right)  # 返回加法结果
         elif p[1].get_type() == "MINUS":
-            return Sub(left, right)
+            return Sub(left, right)  # 返回减法结果
         elif p[1].get_type() == "MUL":
-            return Mul(left, right)
+            return Mul(left, right)  # 返回乘法结果
         elif p[1].get_type() == "DIV":
-            return Div(left, right)
+            return Div(left, right)  # 返回除法结果
         elif p[1].get_type() == "POW":
-            return Pow(left, right)
+            return Pow(left, right)  # 返回幂运算结果
         else:
             raise ValueError("Unknown operator")
 
@@ -130,61 +118,32 @@ def demo1(code: str):
 
     ans = parser.parse(lexer.lex(code)).eval()
     print(ans)
-```
-Then you can do:
-```python
+
+def demo2():
+    code = '3*4+5*6+7'
+    variables = {}
+
+    tokenizer = Tokenizer(code)
+    tokens = list(tokenizer.tokenize())
+
+    parser = Parser(tokens)
+    ast = parser.parse_expr()
+
+    interpreter = Interpreter(variables)
+    result = interpreter.evaluate(ast)
+    print(result)
+
 if __name__ == '__main__':
-    print("Supports floating point numbers, power operator (**), and variable assignment")
-    print("Example: a = 2.5; b = a**2 + 3; b")
-    print("Input 'quit' to exit")
+    print("支持浮点数、幂运算(**)和变量赋值")
+    print("示例: a = 2.5; b = a**2 + 3; b")
+    print("输入'quit'退出")
 
     while True:
         code = input(">>> ")
         if code.lower() == 'quit':
             break
-        # Split input into multiple expressions separated by semicolons
+        # 支持分号分隔多个表达式
         for expr in code.split(';'):
             expr = expr.strip()
             if expr:
                 demo1(expr)
-```
-You can also substitute your own lexer. A lexer is an object with a `next()`
-method that returns either the next token in sequence, or `None` if the token
-stream has been exhausted.
-
-## Why do we have the boxes?
-
-In RPython, like other statically typed languages, a variable must have a
-specific type, we take advantage of polymorphism to keep values in a box so
-that everything is statically typed. You can write whatever boxes you need for
-your project.
-
-If you don't intend to use your parser from RPython, and just want a cool pure
-Python parser you can ignore all the box stuff and just return whatever you
-like from each production method.
-
-## Error handling
-
-By default, when a parsing error is encountered, an `rply.ParsingError` is
-raised, it has a method `get_source_pos()`, which returns an
-`rply.token.SourcePosition` object.
-
-You may also provide an error handler, which, at the moment, must raise an
-exception. It receives the `Token` object that the parser errored on.
-```python
-pg = ParserGenerator(...)
-
-@pg.error
-def error_handler(token):
-    raise ValueError(f"Syntax error: Unexpected token at position {token.get_source_pos()} with type {token.get_type()}")
-```
-## Python compatibility
-
-RPly is tested and known to work under Python 3.8+.
-
-## Links
-
-* [Source code and issue tracker](https://github.com/bluemoon-o2/rply)
-* [PyPI releases](https://pypi.python.org/pypi/rply)
-* [Talk at PyCon US 2013: So you want to write an interpreter?](http://pyvideo.org/video/1694/so-you-want-to-write-an-interpreter)
-* [TensorPlay: A simple deep learning framework](https://github.com/bluemoon-o2/TensorPlay)
