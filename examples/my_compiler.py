@@ -24,6 +24,13 @@ class Variable(BaseBox):
         # Generate the instruction to load the variable
         return [f"LOAD_VAR {self.name}"]
 
+class Print(BaseBox):
+    def __init__(self, expr):
+        self.expr = expr
+
+    def compile(self, context):
+        expr_instructions = self.expr.compile(context)
+        return expr_instructions + ["PRINT"]
 
 class BinaryOp(BaseBox):
     def __init__(self, left, right):
@@ -80,6 +87,7 @@ class Assignment(BaseBox):
 def build_lexer():
     lg = LexerGenerator()
 
+    lg.add('PRINT', r'print')
     # Keywords
     lg.add('VAR', r'var')
     # Operators
@@ -108,6 +116,7 @@ def build_lexer():
 def build_parser():
     # Define all token types
     tokens = [
+        'PRINT',
         'VAR', 'IDENTIFIER', 'NUMBER',
         'PLUS', 'MINUS', 'MUL', 'DIV', 'ASSIGN',
         'SEMICOLON', 'LPAREN', 'RPAREN'
@@ -135,6 +144,10 @@ def build_parser():
     @pg.production('statement : assignment SEMICOLON')
     def statement(p):
         return p[0]
+
+    @pg.production('statement : PRINT expr SEMICOLON')
+    def statement_print(p):
+        return Print(p[1])
 
     # Syntax rules: A variable definition consists of the keyword 'var', a variable name, and an assignment expression.
     @pg.production('var_definition : VAR IDENTIFIER ASSIGN expr')
@@ -214,22 +227,74 @@ def compile_code(code):
 
 
 # ----------------------------
-# 5. Test Compiler
+# 5. Virtual Machine (Interpreter)
+# ----------------------------
+class VirtualMachine:
+    def __init__(self):
+        self.stack = []
+        self.variables = {}
+
+    def run(self, instructions):
+        for instr in instructions:
+            parts = instr.split()
+            op = parts[0]
+
+            if op == "LOAD":
+                value = float(parts[1])
+                self.stack.append(value)
+            elif op == "LOAD_VAR":
+                var_name = parts[1]
+                if var_name not in self.variables:
+                    raise ValueError(f"Undefined variable during execution: {var_name}")
+                self.stack.append(self.variables[var_name])
+            elif op == "STORE":
+                var_name = parts[1]
+                value = self.stack.pop()
+                self.variables[var_name] = value
+            elif op == "ADD":
+                b = self.stack.pop()
+                a = self.stack.pop()
+                self.stack.append(a + b)
+            elif op == "SUB":
+                b = self.stack.pop()
+                a = self.stack.pop()
+                self.stack.append(a - b)
+            elif op == "MUL":
+                b = self.stack.pop()
+                a = self.stack.pop()
+                self.stack.append(a * b)
+            elif op == "DIV":
+                b = self.stack.pop()
+                a = self.stack.pop()
+                if b == 0:
+                    raise ZeroDivisionError("Division by zero")
+                self.stack.append(a / b)
+            elif op == "PRINT":
+                value = self.stack.pop()
+                print(f"Output: {value}")
+            else:
+                raise ValueError(f"Unknown instruction: {op}")
+
+# ----------------------------
+# 6. Test Compiler
 # ----------------------------
 if __name__ == "__main__":
-    # Test code: Variable definition, assignment, and expression
     source_code = """
         var a = 10;
         var b = 20;
         var c = (a + b) * 2;
         a = c / 5;
+        print a;
+        print (b + c);
     """
-
     try:
         # Compile the source code
         machine_code = compile_code(source_code)
         print("Compilation successful! Generated machine code:")
         for i, instr in enumerate(machine_code, 1):
             print(f"{i}. {instr}")
+        print("\nExecuting code...")
+        vm = VirtualMachine()
+        vm.run(machine_code)
     except Exception as e:
-        print(f"Compilation error: {e}")
+        print(f"Error: {e}")
