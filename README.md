@@ -179,9 +179,3 @@ def error_handler(token):
 ## Python compatibility
 
 RPly is tested and known to work under Python 3.8+.
-
-## Links
-* [Source code and issue tracker](https://github.com/bluemoon-o2/rply)
-* [PyPI releases](https://pypi.python.org/pypi/rply)
-* [Talk at PyCon US 2013: So you want to write an interpreter?](http://pyvideo.org/video/1694/so-you-want-to-write-an-interpreter)
-* [TensorPlay: A simple deep learning framework](https://github.com/bluemoon-o2/TensorPlay)
