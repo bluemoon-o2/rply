@@ -1,8 +1,6 @@
 # RPLY
 
-Welcome to RPLY! A pure Python parser generator, that also works with RPython.
-It is a more-or-less direct port of David Beazley's awesome PLY, with a new
-public API, and RPython support.
+Welcome to RPLY! A pure Python parser generator.
 
 You can also find the documentation [online](https://rply.readthedocs.io/).
 ## Examples
@@ -183,7 +181,6 @@ def error_handler(token):
 RPly is tested and known to work under Python 3.8+.
 
 ## Links
-
 * [Source code and issue tracker](https://github.com/bluemoon-o2/rply)
 * [PyPI releases](https://pypi.python.org/pypi/rply)
 * [Talk at PyCon US 2013: So you want to write an interpreter?](http://pyvideo.org/video/1694/so-you-want-to-write-an-interpreter)
